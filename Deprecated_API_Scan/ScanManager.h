@@ -10,6 +10,7 @@
 
 @interface ScanManager : NSObject
 
+// 不要使用此方法，输出的内容会混乱
 + (void)startViaOutput;
 
 + (void)startViaContent;

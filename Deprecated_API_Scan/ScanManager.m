@@ -42,16 +42,20 @@
 + (void)startViaContent
 {
     // 首先clean
+    printf("---> xcodebuild clean \n");
     [XcodeBuildUtil syncClean];
     
     // build
-//    NSString *content = [XcodeBuildUtil syncBuild];
-    NSString *content = [NSString stringWithContentsOfFile:@"/Users/liyang/Desktop/1/1.txt" encoding:NSUTF8StringEncoding error:nil];
+    printf("---> xcodebuild build 此过程大约持续5~8分钟，请耐心等候... \n");
+    NSString *content = [XcodeBuildUtil syncBuild];
+//    NSString *content = [NSString stringWithContentsOfFile:@"/Users/liyang/Desktop/1/1.txt" encoding:NSUTF8StringEncoding error:nil];
     
     // regex
+    printf("---> DocsExport regex start \n");
     [DocsExport pushBuildContent:content];
     
     // export
+    printf("---> DocsExport writeToFile start \n");
     [DocsExport export2File];
 }
 
