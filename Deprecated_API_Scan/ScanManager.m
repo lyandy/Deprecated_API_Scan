@@ -7,6 +7,7 @@
 //
 
 #import "ScanManager.h"
+#import "XcodeBuildUtil.h"
 
 @implementation ScanManager
 
@@ -24,41 +25,20 @@
 //
 //    }];
     
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/bin/sh"];
-
-    NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: @"-c", @"xcodebuild build -workspace /Users/liyang/git/company/maimai/maimai_react_native/maimai_ios/NeiTui.xcworkspace -scheme NeiTui -configuration Debug", nil];
-    [task setArguments: arguments];
-
-    NSPipe *p = [NSPipe pipe];
-    [task setStandardOutput:p];
-    NSFileHandle *fh = [p fileHandleForReading];
-    [fh waitForDataInBackgroundAndNotify];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedData:) name:NSFileHandleDataAvailableNotification object:fh];
-
-    [task launch];
+    // 首先clean
+    [XcodeBuildUtil clean];
     
+    // 编译
+    [XcodeBuildUtil build:^(NSString *line) {
+        
+    } finished:^{
+        
+    }];
     
+    // 要自己维护 runloop
     NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
     [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
     [runLoop run];
-
-}
-
-+ (void)receivedData:(NSNotification *)notif {
-    NSFileHandle *fh = [notif object];
-    NSData *data = [fh availableData];
-    if (data.length > 0) { // if data is found, re-register for more data (and print)
-        [fh waitForDataInBackgroundAndNotify];
-        NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSLog(@"%@" ,str);
-        if ([str containsString:@"BUILD SUCCEEDED"]) {
-            NSLog(@"\n\n\n\n============== 结束");
-        }
-//        printf("%s", [str UTF8String]);
-    }
 }
 
 @end
