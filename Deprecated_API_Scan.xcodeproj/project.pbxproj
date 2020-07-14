@@ -11,6 +11,7 @@
 		B68AE4D324BB3ED500262794 /* ScanManager.m in Sources */ = {isa = PBXBuildFile; fileRef = B68AE4D224BB3ED500262794 /* ScanManager.m */; };
 		B6CDA23024BD5C8D00BE30A6 /* XcodeBuildUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = B6CDA22F24BD5C8D00BE30A6 /* XcodeBuildUtil.m */; };
 		B6CDA23324BD5E0400BE30A6 /* TaskPipe.m in Sources */ = {isa = PBXBuildFile; fileRef = B6CDA23224BD5E0400BE30A6 /* TaskPipe.m */; };
+		B6CDA23724BD820A00BE30A6 /* DocsExport.m in Sources */ = {isa = PBXBuildFile; fileRef = B6CDA23624BD820A00BE30A6 /* DocsExport.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +35,8 @@
 		B6CDA22F24BD5C8D00BE30A6 /* XcodeBuildUtil.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XcodeBuildUtil.m; sourceTree = "<group>"; };
 		B6CDA23124BD5E0400BE30A6 /* TaskPipe.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TaskPipe.h; sourceTree = "<group>"; };
 		B6CDA23224BD5E0400BE30A6 /* TaskPipe.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TaskPipe.m; sourceTree = "<group>"; };
+		B6CDA23524BD820A00BE30A6 /* DocsExport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DocsExport.h; sourceTree = "<group>"; };
+		B6CDA23624BD820A00BE30A6 /* DocsExport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DocsExport.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +76,8 @@
 				B6CDA22F24BD5C8D00BE30A6 /* XcodeBuildUtil.m */,
 				B6CDA23124BD5E0400BE30A6 /* TaskPipe.h */,
 				B6CDA23224BD5E0400BE30A6 /* TaskPipe.m */,
+				B6CDA23524BD820A00BE30A6 /* DocsExport.h */,
+				B6CDA23624BD820A00BE30A6 /* DocsExport.m */,
 			);
 			path = Deprecated_API_Scan;
 			sourceTree = "<group>";
@@ -136,6 +141,7 @@
 			files = (
 				B68AE4D324BB3ED500262794 /* ScanManager.m in Sources */,
 				B6CDA23024BD5C8D00BE30A6 /* XcodeBuildUtil.m in Sources */,
+				B6CDA23724BD820A00BE30A6 /* DocsExport.m in Sources */,
 				B6CDA23324BD5E0400BE30A6 /* TaskPipe.m in Sources */,
 				B68AE4CB24BB3C7C00262794 /* main.m in Sources */,
 			);

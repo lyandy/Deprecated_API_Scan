@@ -8,37 +8,51 @@
 
 #import "ScanManager.h"
 #import "XcodeBuildUtil.h"
+#import "DocsExport.h"
 
 @implementation ScanManager
 
-+ (void)start
++ (void)startViaOutput
 {
-//    NSError *error = nil;
-//    NSRegularExpression *regexTempChildValue = [NSRegularExpression
-//                                                regularExpressionWithPattern:@"^(.+:[0-9]+:[0-9]+):.(error|warning):\\s+('(.+)'\\s+is\\s+deprecated:.+instead)"
-//                                                options:0
-//                                                error:&error];
+    
 //    NSString *str = @"/Users/liyang/git/company/maimai/maimai_react_native/maimai_ios/Important/Util/NTUtilities.h:124:32: warning: 'UIActionSheet' is deprecated: first deprecated in iOS 8.3 - UIActionSheet is deprecated. Use UIAlertController with a preferredStyle of UIAlertControllerStyleActionSheet instead [-Wdeprecated-declarations]";
-//    [regexTempChildValue enumerateMatchesInString:str options:0 range:NSMakeRange(0, str.length) usingBlock:^(NSTextCheckingResult * _Nullable lineResult, NSMatchingFlags flags, BOOL * _Nonnull stop) {
-//        NSString *string = str;
-//        NSLog(@"");
+    
+//    NSString *str = [NSString stringWithContentsOfFile:@"/Users/liyang/Desktop/1/1.txt" encoding:NSUTF8StringEncoding error:nil];
 //
-//    }];
-    
+//    [DocsExport pushBuildLine:str];
+
     // 首先clean
-    [XcodeBuildUtil clean];
-    
+    [XcodeBuildUtil syncClean];
+
     // 编译
-    [XcodeBuildUtil build:^(NSString *line) {
-        
+    [XcodeBuildUtil asyncBuild:^(NSString *line) {
+        printf("===> %s", [line UTF8String]);
+        [DocsExport pushBuildContent:line];
     } finished:^{
-        
+        printf("------->完成");
+        [DocsExport export2File];
     }];
     
-    // 要自己维护 runloop
+    // 由于是 async 要自己维护 runloop
     NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
     [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
     [runLoop run];
+}
+
++ (void)startViaContent
+{
+    // 首先clean
+    [XcodeBuildUtil syncClean];
+    
+    // build
+//    NSString *content = [XcodeBuildUtil syncBuild];
+    NSString *content = [NSString stringWithContentsOfFile:@"/Users/liyang/Desktop/1/1.txt" encoding:NSUTF8StringEncoding error:nil];
+    
+    // regex
+    [DocsExport pushBuildContent:content];
+    
+    // export
+    [DocsExport export2File];
 }
 
 @end

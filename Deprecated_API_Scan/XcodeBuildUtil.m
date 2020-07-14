@@ -15,7 +15,7 @@
 
 @implementation XcodeBuildUtil
 
-+ (NSString *)clean
++ (NSString *)syncClean
 {
     // clean build command
     NSString *cmd = [NSString stringWithFormat:@"xcodebuild clean -workspace %@ -scheme %@ -configuration %@", WORKSPACE, SCHEME, CONFIGURATION];
@@ -23,10 +23,18 @@
     return [TaskPipe runCommand:cmd];
 }
 
-+ (void)build:(void (^)(NSString *))output finished:(void (^)(void))finished
++ (NSString *)syncBuild
+{
+    // clean build command
+    NSString *cmd = [NSString stringWithFormat:@"xcodebuild build -workspace %@ -scheme %@ -configuration %@", WORKSPACE, SCHEME, CONFIGURATION];
+    
+    return [TaskPipe runCommand:cmd];
+}
+
++ (void)asyncBuild:(void (^)(NSString *))output finished:(void (^)(void))finished
 {
     // Debug build command
-    NSString *cmd = [NSString stringWithFormat:@"xcodebuild build -workspace %@ -scheme %@ -configuration %@", WORKSPACE, SCHEME, CONFIGURATION];
+    NSString *cmd = [NSString stringWithFormat:@"xcodebuild build -workspace %@ -scheme %@ -configuration %@ | egrep '^(/Users/.+/maimai_ios/.+:[0-9]+:[0-9]+:.(error|warning):.+is.+deprecated:.+)|^(.+BUILD SUCCEEDED.+)'", WORKSPACE, SCHEME, CONFIGURATION];
     
     [TaskPipe runCommandWaitForDataInBackgroundAndNotify:cmd output:^(NSString *line) {
         output == nil ?: output(line);

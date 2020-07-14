@@ -10,6 +10,8 @@
 
 @interface ScanManager : NSObject
 
-+ (void)start;
++ (void)startViaOutput;
+
++ (void)startViaContent;
 
 @end

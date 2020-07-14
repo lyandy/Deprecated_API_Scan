@@ -10,8 +10,10 @@
 
 @interface XcodeBuildUtil : NSObject
 
-+ (NSString *)clean;
++ (NSString *)syncClean;
 
-+ (void)build:(void(^)(NSString *line))output finished:(void(^)(void))finished;
++ (NSString *)syncBuild;
+
++ (void)asyncBuild:(void(^)(NSString *line))output finished:(void(^)(void))finished;
 
 @end

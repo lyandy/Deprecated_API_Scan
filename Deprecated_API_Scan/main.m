@@ -11,8 +11,7 @@
 
 int main(int argc, const char * argv[]) {
     
-    [ScanManager start];
-    
+    [ScanManager startViaContent];
     
     return 0;
 }
