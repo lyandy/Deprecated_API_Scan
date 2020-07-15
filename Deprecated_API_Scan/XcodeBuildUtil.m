@@ -25,7 +25,7 @@
 
 + (NSString *)syncBuild
 {
-    // clean build command
+    // build command
     NSString *cmd = [NSString stringWithFormat:@"xcodebuild build -workspace %@ -scheme %@ -configuration %@", WORKSPACE, SCHEME, CONFIGURATION];
     
     return [TaskPipe runCommand:cmd];

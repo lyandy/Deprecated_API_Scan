@@ -100,7 +100,7 @@ static NSMutableSet *moduleSetM = nil;
 
 + (void)export2File
 {
-    NSMutableString *strM = [NSMutableString stringWithString:@"||n||API||Module||class:line:offset||reason/suggestion||developer||dev_date||cr||reviewer||review_date||comment||\n"];
+    NSMutableString *strM = [NSMutableString stringWithString:@"||n||API||Module||class:line:offset||reason/suggestion||developer||dev_date||cr||comment||\n"];
     
     //由于allKeys返回的是无序数组，这里我们要排列它们的顺序
     NSArray *sortedArray = [depracatedApiDictM.allKeys sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2){
@@ -115,7 +115,7 @@ static NSMutableSet *moduleSetM = nil;
         [moduleDictM enumerateKeysAndObjectsUsingBlock:^(NSString *frameworkName, NSMutableDictionary *classMarkPostDictM, BOOL * _Nonnull stop) {
             [classMarkPostDictM enumerateKeysAndObjectsUsingBlock:^(NSString *classLineOffsetStr, NSString *deprecatedReason, BOOL * _Nonnull stop) {
                 ++buildDistinguishRecordCount;
-                NSString *lineStr = [NSString stringWithFormat:@"|%lu |%@ |%@ |%@ |%@ | | | | | | |\n", buildDistinguishRecordCount, deprecatedAPI, frameworkName, classLineOffsetStr, deprecatedReason];
+                NSString *lineStr = [NSString stringWithFormat:@"|%lu |%@ |%@ |%@ |%@ | | | | |\n", buildDistinguishRecordCount, deprecatedAPI, frameworkName, classLineOffsetStr, deprecatedReason];
                 [strM appendString:lineStr];
             }];
         }];
