@@ -8,10 +8,12 @@
 
 #import "DocsExport.h"
 
-#define EXPORT_FILE_PATH @"/Users/liyang/Downloads"
+#define EXPORT_FILE_FULL_PATH @"/Users/liyang/Downloads/deprecated_api.txt"
 
-static NSMutableDictionary *frameworksDictM = nil;
-static NSUInteger count = 0;
+static NSMutableDictionary *depracatedApiDictM = nil;
+static NSUInteger buildRecordCount = 0;
+static NSUInteger buildDistinguishRecordCount = 0;
+static NSMutableSet *moduleSetM = nil;
 
 @implementation DocsExport
 
@@ -23,7 +25,8 @@ static NSUInteger count = 0;
         regexValue = [NSRegularExpression regularExpressionWithPattern:@"(/Users/.+/maimai_ios/.+:[0-9]+:[0-9]+):.(error|warning):\\s+('(.+)'\\s+is\\s+deprecated:.+)\\[" options:0 error:nil];
     }
     
-    if (frameworksDictM == nil) { frameworksDictM = [NSMutableDictionary dictionary]; }
+    if (depracatedApiDictM == nil) { depracatedApiDictM = [NSMutableDictionary dictionary]; }
+    if (moduleSetM == nil) { moduleSetM = [NSMutableSet set]; }
 
     [regexValue enumerateMatchesInString:content options:0 range:NSMakeRange(0, content.length) usingBlock:^(NSTextCheckingResult * _Nullable contentResult, NSMatchingFlags flags, BOOL * _Nonnull stop) {
        
@@ -32,7 +35,7 @@ static NSUInteger count = 0;
         
         // 类标记完整路径，类似这样 /Users/liyang/git/company/maimai/maimai_react_native/maimai_ios/Important/Util/NTUtilities.h:124:32
         NSString *classMarkPathStr = [content substringWithRange:[contentResult rangeAtIndex:1]];
-        printf("%lu---> %s  ", (unsigned long)++count, [classMarkPathStr UTF8String]);
+        printf("%lu---> %s  ", (unsigned long)++buildRecordCount, [classMarkPathStr UTF8String]);
         
         // 编译结果类型，error或者warning
 //        NSString *compilingMarkStr = [line substringWithRange:[contentResult rangeAtIndex:2]];
@@ -61,31 +64,33 @@ static NSUInteger count = 0;
             return;
         }
         NSString *frameworkName = [classMarkPostStr componentsSeparatedByString:@"/"][1];
-        // 获取 classLineOffsetStr 类似 xxx.class:3534:233
-        NSString *classLineOffsetStr = classMarkPostArr.lastObject;
+        
+//        // 获取 classLineOffsetStr 类似 xxx.class:3534:233
+//        NSString *classLineOffsetStr = classMarkPostArr.lastObject;
         
         // Important 归属为 PlatformSDK
         if ([frameworkName isEqualToString:@"Important"]) { frameworkName = @"PlatformSDK"; }
+        [moduleSetM addObject:frameworkName];
         
-        if (frameworksDictM[frameworkName] == nil)
+        if (depracatedApiDictM[deprecatedAPI] == nil)
         {
-            frameworksDictM[frameworkName] = [NSMutableDictionary dictionary];
+            depracatedApiDictM[deprecatedAPI] = [NSMutableDictionary dictionary];
         }
         
-        NSMutableDictionary *deprecatedAPIDictM = frameworksDictM[frameworkName];
-        if (deprecatedAPIDictM[deprecatedAPI] == nil)
+        NSMutableDictionary *moduleDictM = depracatedApiDictM[deprecatedAPI];
+        if (moduleDictM[frameworkName] == nil)
         {
-            deprecatedAPIDictM[deprecatedAPI] = [NSMutableDictionary dictionary];
+            moduleDictM[frameworkName] = [NSMutableDictionary dictionary];
         }
         
         // 组合 mark 和 reason
-        NSMutableDictionary *classMarkPostDictM = deprecatedAPIDictM[deprecatedAPI];
-        classMarkPostDictM[classLineOffsetStr] = deprecatedReason;
+        NSMutableDictionary *classMarkPostDictM = moduleDictM[frameworkName];
+        classMarkPostDictM[classMarkPostStr] = deprecatedReason;
         
         // 组合 api 和 mark
-        deprecatedAPIDictM[deprecatedAPI] = classMarkPostDictM;
+        moduleDictM[frameworkName] = classMarkPostDictM;
         // 组合 framework 和 api
-        frameworksDictM[frameworkName] = deprecatedAPIDictM;
+        depracatedApiDictM[deprecatedAPI] = moduleDictM;
         
         NSLog(@"");
     }];
@@ -95,22 +100,34 @@ static NSUInteger count = 0;
 
 + (void)export2File
 {
-    [frameworksDictM enumerateKeysAndObjectsUsingBlock:^(NSString * frameworkName, NSMutableDictionary *deprecatedAPIDictM, BOOL * _Nonnull stop) {
+    NSMutableString *strM = [NSMutableString stringWithString:@"||n||API||Module||class:line:offset||reason/suggestion||developer||dev_date||cr||reviewer||review_date||comment||\n"];
+    
+    //由于allKeys返回的是无序数组，这里我们要排列它们的顺序
+    NSArray *sortedArray = [depracatedApiDictM.allKeys sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2){
+        return [obj1 compare:obj2 options:NSCaseInsensitiveSearch];
+    }];
+
+    [sortedArray enumerateObjectsUsingBlock:^(NSString *deprecatedAPI, NSUInteger idx, BOOL * _Nonnull stop) {
         
-        printf("---> 组合 %s 数据 \n", [frameworkName UTF8String]);
-        NSMutableString *strM = [NSMutableString stringWithString:@"||API||class:line:offset||reason/suggestion||developer||dev_date||reviewer||review_date||comment||\n"];
+        printf("---> 组合 %s 数据 \n", [deprecatedAPI UTF8String]);
         
-        [deprecatedAPIDictM enumerateKeysAndObjectsUsingBlock:^(NSString *api, NSMutableDictionary *classMarkPostDictM, BOOL * _Nonnull stop) {
+        NSMutableDictionary *moduleDictM = depracatedApiDictM[deprecatedAPI];
+        [moduleDictM enumerateKeysAndObjectsUsingBlock:^(NSString *frameworkName, NSMutableDictionary *classMarkPostDictM, BOOL * _Nonnull stop) {
             [classMarkPostDictM enumerateKeysAndObjectsUsingBlock:^(NSString *classLineOffsetStr, NSString *deprecatedReason, BOOL * _Nonnull stop) {
-                NSString *lineStr = [NSString stringWithFormat:@"|%@ |%@ |%@ | | | | | |\n", api, classLineOffsetStr, deprecatedReason];
+                ++buildDistinguishRecordCount;
+                NSString *lineStr = [NSString stringWithFormat:@"|%lu |%@ |%@ |%@ |%@ | | | | | | |\n", buildDistinguishRecordCount, deprecatedAPI, frameworkName, classLineOffsetStr, deprecatedReason];
                 [strM appendString:lineStr];
             }];
         }];
         
-        printf("---> 输出 %s 数据 \n", [frameworkName UTF8String]);
-        [[strM.copy dataUsingEncoding:NSUTF8StringEncoding] writeToFile:[NSString stringWithFormat:@"%@/%@_deprecated.txt", EXPORT_FILE_PATH, frameworkName] atomically:YES];
+        printf("---> 输出 %s 数据 \n", [deprecatedAPI UTF8String]);
     }];
     
+    [[strM.copy dataUsingEncoding:NSUTF8StringEncoding] writeToFile:EXPORT_FILE_FULL_PATH atomically:YES];
+    
+    printf("\n---> 扫描统计：\n---> xcode build 过期api记录 数目: %lu\n---> 去重归纳后 过期api记录 数目: %lu\n---> 过期api 类型 数目: %lu\n---> 涉及的framework: %lu (%s)\n",
+           buildRecordCount, buildDistinguishRecordCount, sortedArray.count, moduleSetM.count, [[moduleSetM.allObjects componentsJoinedByString:@"、"] UTF8String]);
+
     printf("\n-------> all done! \n");
 }
 
